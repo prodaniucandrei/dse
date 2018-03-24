@@ -2,25 +2,41 @@
 
 crypto_module :: crypto_module (sc_module_name name): sc_module(name)
 {
-  a0_pointer.initialize(0x67452301);
-  b0_pointer.initialize(0xEFCDAB89);
-  c0_pointer.initialize(0x98BADCFE);
-  d0_pointer.initialize(0x10325476);
+    ports[0].initialize(0x67452301);
+    ports[1].initialize(0xEFCDAB89);
+    ports[2].initialize(0x98BADCFE);
+    ports[3].initialize(0x10325476);
 
-  SC_METHOD(round_crypto);
-  dont_initialize();
-  sensitive << message_pointer << step_port;
+    SC_METHOD(round_crypto);
+    dont_initialize();
+    sensitive << step_port;;
+    for(int i=0;i<64;i++)
+        sensitive << message_pointer[i];
 }
 
 void crypto_module::round_crypto()
 {
     uint F;
     int g;
-    uint A = a0_pointer.read();
-    uint B = b0_pointer.read();
-    uint C = c0_pointer.read();
-    uint D = d0_pointer.read();
+    uint A = ports[0].read();
+    uint B = ports[1].read();
+    uint C = ports[2].read();
+    uint D = ports[3].read();
     int step = step_port.read();
+    uint m[16], i, j;
+    
+    if(step == 0)
+    {
+        for(int z=0;z<64;z++)
+            data[z] = message_pointer[z].read();
+            
+        cout<<"Asta ar trebui sa fie 3:"<<strlen(data)<<endl;
+        int datalen = strlen(data);
+       
+        for (i = 0, j = 0; i < 16; ++i, j += 4)
+            m[i] = (data[j]) + (data[j + 1] << 8) + (data[j + 2] << 16) + (data[j + 3] << 24);
+        cout<<"Asta ar trebui sa fie mai mult:"<<strlen(data)<<endl<<m<<endl;
+    }
 
     if(step >=0 && step<=15)
     {
@@ -54,17 +70,17 @@ void crypto_module::round_crypto()
     if(step == 63)
     {
         cout<<"finish"<<endl;
-        a0.write(a0_pointer.read() + A);
-        b0.write(b0_pointer.read() + B);
-        c0.write(c0_pointer.read() + C);
-        d0.write(d0_pointer.read() + D);
+        a0.write(ports[0].read() + A);
+        b0.write(ports[1].read() + B);
+        c0.write(ports[2].read() + C);
+        d0.write(ports[3].read() + D);
     }
     else
     {
-        a0_pointer.write(a0_pointer.read() + A);
-        b0_pointer.write(b0_pointer.read() + B);
-        c0_pointer.write(c0_pointer.read() + C);
-        d0_pointer.write(d0_pointer.read() + D);
+        ports[0].write(ports[0].read() + A);
+        ports[1].write(ports[1].read() + B);
+        ports[2].write(ports[2].read() + C);
+        ports[3].write(ports[3].read() + D);
         step_port.write(step_port.read() + 1);
     }
 

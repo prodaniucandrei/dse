@@ -2,11 +2,8 @@
 #include "crypto_module.h"
 
 SC_MODULE(start_module){
-    sc_signal<char> message_ch;
-    sc_signal<uint> a_ch;
-    sc_signal<uint> b_ch;
-    sc_signal<uint> c_ch;
-    sc_signal<uint> d_ch;
+    sc_signal<char> message_ch[64];
+    sc_signal<uint> signals[4];
     sc_signal<int> step_ch;
 
     //final hash channel

@@ -1,12 +1,11 @@
 #include "systemc.h"
+#include "iostream"
+#include "string.h"
 
 SC_MODULE(crypto_module) {
  
-  sc_in<char> message_pointer;
-  sc_inout<uint> a0_pointer;
-  sc_inout<uint> b0_pointer;
-  sc_inout<uint> c0_pointer;
-  sc_inout<uint> d0_pointer;
+  sc_in<char> message_pointer[64];
+  sc_inout<uint> ports[4];
   sc_inout<int> step_port;
 
   //result hash
@@ -14,15 +13,16 @@ SC_MODULE(crypto_module) {
   sc_out<uint> b0;
   sc_out<uint> c0;
   sc_out<uint> d0;
-
-  int m[16] = {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16};
+  
+  char data[64];// = "hel";
   SC_HAS_PROCESS(crypto_module);
 
   uint s[64] = {7,12,17,22,7,12,17,22,7,12,17,22,7,12,17,22,
                  5,9,14,20,5,9,14,20,5,9,14,20,5,9,14,20,
                   4,11,16,23,4,11,16,23,4,11,16,23,4,11,16,23,
                   6,10,15,21,6,10,15,21,6,10,15,21,6,10,15,21};
-                  
+  
+
   uint k[64] = {0xd76aa478, 0xe8c7b756, 0x242070db, 0xc1bdceee,
                 0xf57c0faf, 0x4787c62a, 0xa8304613, 0xfd469501,
                 0x698098d8, 0x8b44f7af, 0xffff5bb1, 0x895cd7be,
