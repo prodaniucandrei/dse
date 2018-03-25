@@ -6,12 +6,14 @@ SC_MODULE(start_module){
     sc_signal<uint> signals[4];
     sc_signal<int> step_ch;
 
+    sc_signal<uint> block_vars[4];
     //final hash channel
-    sc_signal<uint> a0_ch;
-    sc_signal<uint> b0_ch;
-    sc_signal<uint> c0_ch;
-    sc_signal<uint> d0_ch;
+    sc_signal<uint> final_hash[4];
 
+    //ctx
+    int datalen, current_count;
+    char data_to_send[64];
+    unsigned long number_of_bits; 
 
     crypto_module crypto;
 
@@ -21,5 +23,5 @@ SC_MODULE(start_module){
     
     void start_crypto();
     void print_result();
-
+    void initialize();
 };

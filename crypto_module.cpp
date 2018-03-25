@@ -2,16 +2,20 @@
 
 crypto_module :: crypto_module (sc_module_name name): sc_module(name)
 {
-    ports[0].initialize(0x67452301);
-    ports[1].initialize(0xEFCDAB89);
-    ports[2].initialize(0x98BADCFE);
-    ports[3].initialize(0x10325476);
-
     SC_METHOD(round_crypto);
     dont_initialize();
     sensitive << step_port;;
     for(int i=0;i<64;i++)
         sensitive << message_pointer[i];
+
+    SC_METHOD(teste);
+    
+}
+
+void crypto_module::teste(){
+    for(int i=0;i<64;i++)
+        cout<<k[i]<< " ";
+    cout<<endl;
 }
 
 void crypto_module::round_crypto()
@@ -22,11 +26,17 @@ void crypto_module::round_crypto()
     uint B = ports[1].read();
     uint C = ports[2].read();
     uint D = ports[3].read();
+    cout << A << " "<<B<<" "<<C<<" "<<D<<endl;
     int step = step_port.read();
     uint m[16], i, j;
     
     if(step == 0)
     {
+        A = vars_port[0].read();
+        B = vars_port[1].read();
+        C = vars_port[2].read();
+        D = vars_port[3].read();
+        cout <<"1----"<< A << " "<<B<<" "<<C<<" "<<D<<endl;
         for(int z=0;z<64;z++)
             data[z] = message_pointer[z].read();
             
@@ -70,10 +80,10 @@ void crypto_module::round_crypto()
     if(step == 63)
     {
         cout<<"finish"<<endl;
-        a0.write(ports[0].read() + A);
-        b0.write(ports[1].read() + B);
-        c0.write(ports[2].read() + C);
-        d0.write(ports[3].read() + D);
+        result_hash[0].write(ports[0].read() + A);
+        result_hash[1].write(ports[1].read() + B);
+        result_hash[2].write(ports[2].read() + C);
+        result_hash[3].write(ports[3].read() + D);
     }
     else
     {
@@ -81,6 +91,7 @@ void crypto_module::round_crypto()
         ports[1].write(ports[1].read() + B);
         ports[2].write(ports[2].read() + C);
         ports[3].write(ports[3].read() + D);
+        next_trigger(100, SC_MS);
         step_port.write(step_port.read() + 1);
     }
 

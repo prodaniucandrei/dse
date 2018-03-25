@@ -7,12 +7,10 @@ SC_MODULE(crypto_module) {
   sc_in<char> message_pointer[64];
   sc_inout<uint> ports[4];
   sc_inout<int> step_port;
+  sc_in<uint> vars_port[4];
 
   //result hash
-  sc_out<uint> a0;
-  sc_out<uint> b0;
-  sc_out<uint> c0;
-  sc_out<uint> d0;
+  sc_out<uint> result_hash[4];
   
   char data[64];// = "hel";
   SC_HAS_PROCESS(crypto_module);
@@ -43,4 +41,5 @@ SC_MODULE(crypto_module) {
   crypto_module (sc_module_name name);
   void round_crypto();
   void print_result();
+  void teste();
 };

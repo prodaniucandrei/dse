@@ -10,28 +10,41 @@ start_module :: start_module(sc_module_name name) : sc_module(name), crypto("cry
         crypto.ports[i](signals[i]);
 
     crypto.step_port(step_ch);
-    crypto.a0(a0_ch);
-    crypto.b0(b0_ch);
-    crypto.c0(c0_ch);
-    crypto.d0(d0_ch);
+
+    for(int i=0;i<4;i++)
+        crypto.result_hash[i](final_hash[i]);
     
+    for(int i=0;i<4;i++)
+        crypto.vars_port[i](block_vars[i]);
+
     SC_THREAD(start_crypto);
 
     SC_METHOD(print_result);
     dont_initialize();
-    sensitive << a0_ch.default_event()<< b0_ch.default_event()<<c0_ch.default_event()<<d0_ch.default_event();
+    sensitive << final_hash[0].default_event()<< final_hash[1].default_event()<<final_hash[2].default_event()<<final_hash[3].default_event();
 
+    SC_METHOD(initialize);
+    dont_initialize();
+
+}
+
+void start_module :: initialize()
+{
+    block_vars[0].write(0x67452301);
+    block_vars[1].write(0xEFCDAB89);
+    block_vars[2].write(0x98BADCFE);
+    block_vars[3].write(0x10325476);
 }
 
 void start_module :: start_crypto()
 {
     char data[] = "hel";
     
-    int datalen = strlen(data);
-    int current_count=0;
-    char data_to_send[64];
-    unsigned long number_of_bits = 0;
-
+    datalen = strlen(data);
+    current_count=0;
+    number_of_bits = 0;
+    
+    initialize();
     for(int i=0;i<datalen;i++)
     {
         data_to_send[current_count] = data[i];
@@ -40,7 +53,7 @@ void start_module :: start_crypto()
         {   
             for(int i=0;i<64;i++)
                 message_ch[i].write(data_to_send[i]);
-            wait(a0_ch.default_event() & b0_ch.default_event() & c0_ch.default_event() & d0_ch.default_event());
+            wait(final_hash[0].default_event() & final_hash[1].default_event() & final_hash[2].default_event() & final_hash[3].default_event());
             number_of_bits += 512;
             current_count = 0;
         }
@@ -59,7 +72,7 @@ void start_module :: start_crypto()
             data_to_send[current_count++] = 0x00;
         for(int i=0;i<64;i++)
             message_ch[i].write(data_to_send[i]);
-        wait(a0_ch.default_event() & b0_ch.default_event() & c0_ch.default_event() & d0_ch.default_event());
+        wait(final_hash[0].default_event() & final_hash[1].default_event() & final_hash[2].default_event() & final_hash[3].default_event());
         memset(data_to_send, 0, 56);    
     }
 
@@ -79,5 +92,9 @@ void start_module :: start_crypto()
 }
 
 void start_module :: print_result(){
-    cout<<a0_ch.read()<<b0_ch.read()<<c0_ch.read()<<d0_ch.read()<<endl;
+    // block_vars[0].write(final_hash[0].read());
+    // block_vars[1].write(final_hash[1].read());
+    // block_vars[2].write(final_hash[2].read());
+    // block_vars[3].write(final_hash[3].read());
+    cout<<final_hash[0].read()<<final_hash[1].read()<<final_hash[2].read()<<final_hash[3].read()<<endl;
 }

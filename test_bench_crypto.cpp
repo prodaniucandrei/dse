@@ -5,7 +5,7 @@ int sc_main(int argc, char **argv)
 {
   start_module start_module("start111");
   
-  sc_start(10000, SC_MS);
+  sc_start();
 
   return 0;
 }
