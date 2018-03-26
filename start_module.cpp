@@ -38,22 +38,30 @@ void start_module :: initialize()
 
 void start_module :: start_crypto()
 {
-    char data[] = "hel";
-    
-    datalen = strlen(data);
+    unsigned char data[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    for(int i=0;i<strlen((char*)data);i++)
+        cout<<data[i];
+    cout<<endl;
+    datalen = strlen((char*)data);
     current_count=0;
     number_of_bits = 0;
-    
+    cout<<datalen<<endl;
     initialize();
     for(int i=0;i<datalen;i++)
     {
-        data_to_send[current_count] = data[i];
-        current_count++;
+        cout<<i<<" "<<current_count<<endl;
+        data_to_send[current_count++] = data[i];
+        
         if(current_count == 64)
         {   
             for(int i=0;i<64;i++)
                 message_ch[i].write(data_to_send[i]);
+            //step_ch.write(0);
             wait(final_hash[0].default_event() & final_hash[1].default_event() & final_hash[2].default_event() & final_hash[3].default_event());
+            block_vars[0].write(final_hash[0].read());
+            block_vars[1].write(final_hash[1].read());
+            block_vars[2].write(final_hash[2].read());
+            block_vars[3].write(final_hash[3].read());
             number_of_bits += 512;
             current_count = 0;
         }
@@ -68,11 +76,18 @@ void start_module :: start_crypto()
     else if(current_count >=56)
     {
         data_to_send[current_count++] = 0x80;
-        while(datalen < 64)
+        cout<<"cc:"<<current_count<<endl;
+        while(current_count < 64)
             data_to_send[current_count++] = 0x00;
+        cout<<"cc:"<<current_count<<endl;
         for(int i=0;i<64;i++)
             message_ch[i].write(data_to_send[i]);
+        //step_ch.write(0);
         wait(final_hash[0].default_event() & final_hash[1].default_event() & final_hash[2].default_event() & final_hash[3].default_event());
+        block_vars[0].write(final_hash[0].read());
+        block_vars[1].write(final_hash[1].read());
+        block_vars[2].write(final_hash[2].read());
+        block_vars[3].write(final_hash[3].read());
         memset(data_to_send, 0, 56);    
     }
 
@@ -86,15 +101,29 @@ void start_module :: start_crypto()
     data_to_send[61] = number_of_bits >> 40;
     data_to_send[62] = number_of_bits >> 48;
     data_to_send[63] = number_of_bits >> 56;
+    for(int i=0;i<64;i++)
+        cout<<(int)data_to_send[i];
+    cout<<endl;
+    
     //int i;
+    
     for(int i=0;i<64;i++)
         message_ch[i].write(data_to_send[i]);
+    //step_ch.write(0);
+    wait(final_hash[0].default_event() & final_hash[1].default_event() & final_hash[2].default_event() & final_hash[3].default_event());
+    cout<<final_hash[0].read()<<" "<<final_hash[1].read()<<" "<<final_hash[2].read()<<" "<<final_hash[3].read()<<" "<<endl;
+    unsigned char hash[16];
+     for (int i = 0; i < 4; ++i) {
+		hash[i]      = (final_hash[0].read() >> (i * 8)) & 0x000000ff;
+		hash[i + 4]  = (final_hash[1].read() >> (i * 8)) & 0x000000ff;
+		hash[i + 8]  = (final_hash[2].read() >> (i * 8)) & 0x000000ff;
+		hash[i + 12] = (final_hash[3].read() >> (i * 8)) & 0x000000ff;
+        }
+    for(int i=0;i<16;i++)
+            cout<<hash[i];
+        cout<<endl;
 }
 
 void start_module :: print_result(){
-    // block_vars[0].write(final_hash[0].read());
-    // block_vars[1].write(final_hash[1].read());
-    // block_vars[2].write(final_hash[2].read());
-    // block_vars[3].write(final_hash[3].read());
-    cout<<final_hash[0].read()<<final_hash[1].read()<<final_hash[2].read()<<final_hash[3].read()<<endl;
+    cout<<"bloc";
 }

@@ -12,8 +12,8 @@ SC_MODULE(start_module){
 
     //ctx
     int datalen, current_count;
-    char data_to_send[64];
-    unsigned long number_of_bits; 
+    unsigned char data_to_send[64];
+    unsigned long long number_of_bits; 
 
     crypto_module crypto;
 

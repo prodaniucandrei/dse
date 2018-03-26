@@ -11,8 +11,9 @@ SC_MODULE(crypto_module) {
 
   //result hash
   sc_out<uint> result_hash[4];
-  
-  char data[64];// = "hel";
+  uint m[16], i, j;
+  unsigned char data[64];
+  int step=0;
   SC_HAS_PROCESS(crypto_module);
 
   uint s[64] = {7,12,17,22,7,12,17,22,7,12,17,22,7,12,17,22,
@@ -40,6 +41,4 @@ SC_MODULE(crypto_module) {
   
   crypto_module (sc_module_name name);
   void round_crypto();
-  void print_result();
-  void teste();
 };

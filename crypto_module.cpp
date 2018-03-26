@@ -7,15 +7,6 @@ crypto_module :: crypto_module (sc_module_name name): sc_module(name)
     sensitive << step_port;;
     for(int i=0;i<64;i++)
         sensitive << message_pointer[i];
-
-    SC_METHOD(teste);
-    
-}
-
-void crypto_module::teste(){
-    for(int i=0;i<64;i++)
-        cout<<k[i]<< " ";
-    cout<<endl;
 }
 
 void crypto_module::round_crypto()
@@ -26,9 +17,9 @@ void crypto_module::round_crypto()
     uint B = ports[1].read();
     uint C = ports[2].read();
     uint D = ports[3].read();
-    cout << A << " "<<B<<" "<<C<<" "<<D<<endl;
-    int step = step_port.read();
-    uint m[16], i, j;
+    
+    //int step = step_port.read();
+    cout <<step<<endl;
     
     if(step == 0)
     {
@@ -39,13 +30,9 @@ void crypto_module::round_crypto()
         cout <<"1----"<< A << " "<<B<<" "<<C<<" "<<D<<endl;
         for(int z=0;z<64;z++)
             data[z] = message_pointer[z].read();
-            
-        cout<<"Asta ar trebui sa fie 3:"<<strlen(data)<<endl;
-        int datalen = strlen(data);
        
         for (i = 0, j = 0; i < 16; ++i, j += 4)
             m[i] = (data[j]) + (data[j + 1] << 8) + (data[j + 2] << 16) + (data[j + 3] << 24);
-        cout<<"Asta ar trebui sa fie mai mult:"<<strlen(data)<<endl<<m<<endl;
     }
 
     if(step >=0 && step<=15)
@@ -75,23 +62,23 @@ void crypto_module::round_crypto()
     C = B;
     B = B + ((F << s[step]) | (F >> (32 - s[step])));
 
-    cout << step<<endl;
-
+    cout << A << " "<<B<<" "<<C<<" "<<D<<endl;
     if(step == 63)
     {
         cout<<"finish"<<endl;
-        result_hash[0].write(ports[0].read() + A);
-        result_hash[1].write(ports[1].read() + B);
-        result_hash[2].write(ports[2].read() + C);
-        result_hash[3].write(ports[3].read() + D);
+        result_hash[0].write(vars_port[0].read() + A);
+        result_hash[1].write(vars_port[1].read() + B);
+        result_hash[2].write(vars_port[2].read() + C);
+        result_hash[3].write(vars_port[3].read() + D);
+        step = 0;
     }
     else
     {
-        ports[0].write(ports[0].read() + A);
-        ports[1].write(ports[1].read() + B);
-        ports[2].write(ports[2].read() + C);
-        ports[3].write(ports[3].read() + D);
-        next_trigger(100, SC_MS);
+        ports[0].write( A);
+        ports[1].write( B);
+        ports[2].write( C);
+        ports[3].write( D);
+        step++;
         step_port.write(step_port.read() + 1);
     }
 
